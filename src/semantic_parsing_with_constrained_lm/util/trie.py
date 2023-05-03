@@ -21,6 +21,8 @@ from typing import (
 
 from semantic_parsing_with_constrained_lm.util.missing_sentinel import MISSING_SENTINEL, MissingSentinel
 
+from pdb import set_trace as bp
+
 K = TypeVar("K", bound=Hashable)
 V = TypeVar("V")
 

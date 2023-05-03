@@ -14,6 +14,8 @@ from semantic_parsing_with_constrained_lm.datum import Datum, FullDatum
 from semantic_parsing_with_constrained_lm.eval import TopKExactMatch
 from semantic_parsing_with_constrained_lm.trie_partial_parse import TriePartialParse
 
+from pdb import set_trace as bp
+
 
 class OutputType(str, Enum):
     Utterance = "utterance"
@@ -54,7 +56,6 @@ class OvernightPieces:
     ) -> "OvernightPieces":
         # TODO make this configurable?
         canonical_data = json.load(open(root_dir / f"{domain}.canonical.json"))
-
         if output_type == OutputType.Utterance:
             target_output_to_denotation = {
                 k: v["denotation"] for k, v in canonical_data.items()
@@ -68,8 +69,9 @@ class OvernightPieces:
                     continue
                 if simplify_logical_forms:
                     formula = OvernightPieces.simplify_lf(formula)
-                assert formula not in target_output_to_denotation
-                target_output_to_denotation[formula] = program_info["denotation"]
+                if formula not in target_output_to_denotation:
+                # assert formula not in target_output_to_denotation
+                    target_output_to_denotation[formula] = program_info["denotation"]
             datum_key = "formula"
         else:
             raise ValueError(output_type)
@@ -106,7 +108,6 @@ class OvernightPieces:
                 tokenizer.encode(canon) for canon in target_output_to_denotation
             )
         partial_parse_builder = lambda _: TriePartialParse(canonical_trie)
-
         return OvernightPieces(
             train_data,
             test_data,

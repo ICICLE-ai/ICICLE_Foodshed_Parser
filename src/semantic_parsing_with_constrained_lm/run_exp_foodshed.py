@@ -37,6 +37,7 @@ from semantic_parsing_with_constrained_lm.eval import Metric, exact_match_with_l
 from semantic_parsing_with_constrained_lm.lm import TRAINED_MODEL_DIR, ClientType
 from semantic_parsing_with_constrained_lm.model import Model
 
+from pdb import set_trace as bp
 
 @dataclass
 class Experiment(Generic[FullDatumSub]):

@@ -42,7 +42,7 @@ from semantic_parsing_with_constrained_lm.fit_max_steps import compute_and_print
 from semantic_parsing_with_constrained_lm.lm import TRAINED_MODEL_DIR, AutoregressiveModel, ClientType
 from semantic_parsing_with_constrained_lm.lm_bart import Seq2SeqBart
 from semantic_parsing_with_constrained_lm.lm_openai_gpt3 import IncrementalOpenAIGPT3
-from semantic_parsing_with_constrained_lm.run_exp import EvalSplit, Experiment
+from foodshed.semantic_parsing_with_constrained_lm.src.semantic_parsing_with_constrained_lm.run_exp_foodshed import EvalSplit, Experiment
 from semantic_parsing_with_constrained_lm.search import PartialParse, StartsWithSpacePartialParse
 
 

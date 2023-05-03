@@ -8,6 +8,7 @@ from typing import Dict, Generic, List, Optional, Sequence, TypeVar
 
 from semantic_parsing_with_constrained_lm.datum import FullDatum, FullDatumSub
 from semantic_parsing_with_constrained_lm.model import ModelResult
+from pdb import set_trace as bp
 
 Pred = TypeVar("Pred")
 Target = TypeVar("Target")

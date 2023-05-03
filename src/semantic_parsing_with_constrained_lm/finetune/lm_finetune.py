@@ -642,7 +642,9 @@ def main(
         "publications",
         "recipes",
         "restaurants",
+        "foodshed"
     )
+    # AMAD add Foodshed here
     for domain in domains:
         for overnight_data_type in [
             OutputType.Utterance,

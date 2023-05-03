@@ -18,6 +18,7 @@ from typing import (
 import torch
 from cached_property import cached_property
 from transformers import GPT2Tokenizer
+from pdb import set_trace as bp
 
 from semantic_parsing_with_constrained_lm.datum import Datum, DatumSub, FullDatum, FullDatumSub
 from semantic_parsing_with_constrained_lm.fewshot import (

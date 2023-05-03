@@ -24,6 +24,7 @@ from typing import (
 
 import torch
 from transformers import GPT2Tokenizer
+from pdb import set_trace as bp
 
 from semantic_parsing_with_constrained_lm.lm import HS, AutoregressiveModel
 
@@ -284,6 +285,21 @@ class ConstrainedDecodingProblem(Generic[HS, PSNSub]):
 
         if self.cache is not None:
             self.cache[node.packed] = result
+
+        '''Modified Component From Original'''    
+        if len(result) == 0:
+            eos_logprob = torch.logsumexp(next_logprobs[self.eos], dim=0)
+            new_unnorm_cost = node.unnormalized_cost - eos_logprob.item()
+            result.append(
+                FullSearchNode(
+                    node.packed,
+                    node.partial_parse,
+                    hidden_state=None,
+                    is_finished=True,
+                    cost=self.length_normalized(new_unnorm_cost, len(node.tokens) + 1),
+                    unnormalized_cost=new_unnorm_cost,
+                )
+            )
         return result
 
 
@@ -345,7 +361,7 @@ async def beam_search(
     beam_size: int,
     max_steps: Optional[int] = None,
     event_listener: BeamSearchEventListener = BeamSearchEventListener(),
-    keep_finished_nodes: bool = False,
+    keep_finished_nodes: bool = True, # Originally set to False
 ) -> List[FullSearchNode]:
     max_steps = MAX_STEPS if max_steps is None else max_steps
 
@@ -369,7 +385,6 @@ async def beam_search(
             )
             for new_node in per_node_expansion
         ]
-
         # We allow `candidates` and `finished` to compete with each other,
         # as the score will no longer decrease monotonically when we have a length penalty.
         sorted_candidates_plus_finished = sorted(
@@ -382,7 +397,6 @@ async def beam_search(
                 finished.append(n)
             else:
                 beam.append(n)
-
         # If there's a less-competitive candidate which is finished, then keep it for later
         if keep_finished_nodes:
             for n in sorted_candidates_plus_finished[beam_size:]:
@@ -392,5 +406,5 @@ async def beam_search(
         # Due to cycles or some other reason, hidden states are not freed on
         # time unless we manually collect.
         gc.collect()
-
+    
     return sorted(finished + finished_extra, key=lambda n: n.cost)[: beam_size * 2]

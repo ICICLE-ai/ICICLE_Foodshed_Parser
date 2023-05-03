@@ -14,11 +14,11 @@ from semantic_parsing_with_constrained_lm.lm import TRAINED_MODEL_DIR, Autoregre
 from semantic_parsing_with_constrained_lm.lm_bart import Seq2SeqBart
 from semantic_parsing_with_constrained_lm.lm_openai_gpt3 import IncrementalOpenAIGPT3
 from semantic_parsing_with_constrained_lm.paths import DOMAINS_DIR
-from semantic_parsing_with_constrained_lm.run_exp import EvalSplit, Experiment
+from foodshed.semantic_parsing_with_constrained_lm.src.semantic_parsing_with_constrained_lm.run_exp_foodshed import EvalSplit, Experiment
 from semantic_parsing_with_constrained_lm.search import PartialParse, StartsWithSpacePartialParse
 
 from pdb import set_trace as bp
-from semantic_parsing_with_constrained_lm.async_tools import limits
+
 
 def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
     BEAM_SIZE = 10
@@ -38,10 +38,11 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
         domain: str,
         train_size: int,
     ):
+        print("Hello 2")
         lm: AutoregressiveModel
         if model == ClientType.GPT3:
             lm = IncrementalOpenAIGPT3()
-        elif model == ClientType.BART: # AMAD: Need this code to access the model
+        elif model == ClientType.BART:
             lm = Seq2SeqBart(
                 f"{TRAINED_MODEL_DIR}/20000/overnight_{domain}_{output_type}/",
                 device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
@@ -50,6 +51,7 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
             raise ValueError(model)
 
         # lm.predict()
+
         pieces = all_pieces.get((domain, output_type))
         if not pieces:
             pieces = all_pieces[domain, output_type] = OvernightPieces.from_dir(
@@ -97,7 +99,6 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
         else:
             raise ValueError(f"{problem_type} not allowed")
 
-        testDatum = Datum(None, None, None, "Remove a store from Neil Ave")
         parser = make_semantic_parser(
             train_data,
             lm,
@@ -107,10 +108,7 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
             partial_parse_builder,
             lambda _datum: max_steps,
         )
-
-
-
-        '''AMAD: Need to make a parser'''
+        bp()
         return Experiment(
             model=parser,
             client=lm,
@@ -130,11 +128,8 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
         domain: str,
         train_size: int,
     ):
-        # exp_name = f"overnight_{model}_{eval_split}_{domain}_{problem_type}_{output_type}_train-{train_size}"
-        exp_name = f"overnight_{model}_{eval_split}_{domain}_{problem_type}_canonicalUtterance_train-{train_size}"
-        exps_dict[exp_name] = lambda: create_exp(
-            problem_type, output_type, domain, train_size
-        )
+        exp_name = f"overnight_{model}_{eval_split}_{domain}_{problem_type}_{output_type}_train-{train_size}"
+        exps_dict[exp_name] = create_exp(problem_type, output_type, domain, train_size)
 
     # DOMAINS = (
     #     "calendar",
@@ -147,30 +142,30 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
     #     "socialnetwork",
     # )
 
-    DOMAINS = ["foodshed"]
-
+    DOMAINS = ("foodshed")
     result: Dict[str, Callable[[], Experiment]] = {}
+    add_exp_to_dict(result, "constrained", OutputType.Utterance, "foodshed", 200)
     if eval_split == EvalSplit.TestFull:
         for domain in DOMAINS:
             # \label{tab:overnight}
             add_exp_to_dict(result, "constrained", OutputType.Utterance, domain, 200)
-            # if not use_gpt3:
+            if not use_gpt3:
                 # \label{tab:overnight}
-                # add_exp_to_dict(
-                #     result, "constrained", OutputType.MeaningRepresentation, domain, 200
-                # )
+                add_exp_to_dict(
+                    result, "constrained", OutputType.MeaningRepresentation, domain, 200
+                )
                 # \label{tab:overnight_100}
-                # add_exp_to_dict(
-                #     result, "unconstrained-greedy", OutputType.Utterance, domain, 200
-                # )
+                add_exp_to_dict(
+                    result, "unconstrained-greedy", OutputType.Utterance, domain, 200
+                )
                 # \label{tab:overnight_100}
-                # add_exp_to_dict(
-                #     result,
-                #     "unconstrained-greedy",
-                #     OutputType.MeaningRepresentation,
-                #     domain,
-                #     200,
-                # )
+                add_exp_to_dict(
+                    result,
+                    "unconstrained-greedy",
+                    OutputType.MeaningRepresentation,
+                    domain,
+                    200,
+                )
     elif eval_split == EvalSplit.TestSubset and use_gpt3:
         for domain in DOMAINS:
             # \label{tab:overnight_100}
@@ -211,3 +206,15 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
         raise Exception(f"{eval_split} not supported")
 
     return result
+
+def main():
+    # kwargs = {
+    # "model": model,
+    # "results_dir": results_dir,
+    # "rank": rank,
+    # "eval_split": eval_split,
+    # }
+    return 0
+
+if __name__== "__main__":
+    main()
