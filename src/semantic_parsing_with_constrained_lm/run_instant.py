@@ -288,10 +288,14 @@ def main(
     for result in outVal:
         print(f"{result['text']} , {result['score']}")
 
-    with open('output.tsv', 'a') as fout:
-        fout.write("\n")
-        for result in outVal:
-            fout.write(f"{utterance}, {result['text']}, {result['score']}\n")
+    # Outval to json
+    with open('output.json', 'w') as fout:
+        json.dump(outVal, fout)
+
+    # with open('output.tsv', 'a') as fout:
+    #     fout.write("\n")
+    #     for result in outVal:
+    #         fout.write(f"{utterance}, {result['text']}, {result['score']}\n")
     return outVal
 
 if __name__ == "__main__":
