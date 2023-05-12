@@ -38,10 +38,16 @@ def build_config(_log_dir, **_kwargs,) -> Dict[str, Callable[[], Experiment]]:
         train_size: int,
     ):
         lm: AutoregressiveModel
+        # lm = Seq2SeqBart(
+        #     f"{TRAINED_MODEL_DIR}/20000/overnight_{domain}_{output_type}/",
+        #     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+        # )
+
         lm = Seq2SeqBart(
-            f"{TRAINED_MODEL_DIR}/20000/overnight_{domain}_{output_type}/",
-            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+            "trained_models/foodshed_utterance/",
+            device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         )
+
 
         # lm.predict()
         pieces = all_pieces.get((domain, output_type))

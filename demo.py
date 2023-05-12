@@ -1,5 +1,4 @@
 from pdb import set_trace as bp
-from tabulate import tabulate
 import json
 import sys
 
@@ -164,7 +163,12 @@ def prettyPrint(candidates):
     candidates = candidates[:5]
     for idx, candidate in enumerate(candidates):
         candidate.insert(0, idx+1)
-    print('\n'+tabulate(candidates, headers=headers))
+    print('\n')
+    print('{:<10} {:<50} {:<20}'.format(*headers))
+    for candidate in candidates:
+        print('{:<10} {:<50} {:<20}'.format(*candidate))
+    print('\n')
+    
 
 def canonToCmd(example, inFile = False):
     def parseLocation(locationString):
