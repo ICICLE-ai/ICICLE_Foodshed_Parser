@@ -104,7 +104,7 @@ def main(
             exps_dict = {exp_name: (lambda exp=exp: exp) for exp_name, exp in exps}
 
         if exp_names and exp_name_pattern:
-            print("Cannot specify --exp-names and --exp-name-pattern together")
+            # print("Cannot specify --exp-names and --exp-name-pattern together")
             return
 
         if exp_name_pattern:
@@ -114,23 +114,23 @@ def main(
                 if any(re.match(pat, name) for pat in exp_name_pattern)
             ]
             if not exp_names:
-                print("--exp-name-pattern matched no experiment names")
+                # print("--exp-name-pattern matched no experiment names")
                 return
-            print("Matched experiments:")
-            for name in exp_names:
-                print(name)
+            # print("Matched experiments:")
+            # for name in exp_names:
+            #     print(name)
         elif not exp_names:
             exp_names = list(exps_dict.keys())
 
         error = False
         for exp_name in exp_names:
             if exp_name not in exps_dict:
-                print(f"Experiment {exp_name} not found in config.")
+                # print(f"Experiment {exp_name} not found in config.")
                 error = True
         if error:
-            print("Names in config:")
-            for name in exps_dict.keys():
-                print(name)
+            # print("Names in config:")
+            # for name in exps_dict.keys():
+            #     print(name)
             return
 
         for exp_name in exp_names:
@@ -148,9 +148,9 @@ def main(
         # if results_path.exists() and not rerun:
         #     print(f"Skipping {exp_name}, already finished")
         #     return
-        print("********************")
-        print(f"Running {exp_name} rank {rank} world size {world_size}")
-        print("********************")
+        # print("********************")
+        # print(f"Running {exp_name} rank {rank} world size {world_size}")
+        # print("********************")
         now = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
         all_metric_results: Dict[str, float] = {}
 
@@ -160,10 +160,10 @@ def main(
             else exp.test_data
         )
         if not test_data:
-            print(f"No test data! ids: {ids}")
+            # print(f"No test data! ids: {ids}")
             return
 
-        print(f"Total test examples: {len(test_data)}")
+        # print(f"Total test examples: {len(test_data)}")
         test_data = test_data[
             (rank * len(test_data))
             // world_size : ((rank + 1) * len(test_data))
@@ -172,7 +172,7 @@ def main(
         if num_eval_examples is not None:
             test_data = test_data[:num_eval_examples]
 
-        print(f"Test examples this shard: {len(test_data)}")
+        # print(f"Test examples this shard: {len(test_data)}")
         current_test_index = 0
 
         # Find past model outputs
@@ -221,7 +221,7 @@ def main(
                         wrap_exception=not debug,
                     ):
                         beam_search_results = [beam.text for beam in kbest]
-                        print(beam_search_results)
+                        # print(beam_search_results)
                         returnVal.extend(kbest)
                         model_outputs_f.write(
                             json.dumps(
@@ -249,17 +249,17 @@ def main(
                         raise e.__cause__
 
                     # pylint: disable=no-member
-                    print(
-                        f"Last test_datum: {e.orig_item} in experiment {exp_name}",
-                        file=sys.stderr,
-                    )
+                    # print(
+                    #     f"Last test_datum: {e.orig_item} in experiment {exp_name}",
+                    #     file=sys.stderr,
+                    # )
 
                 if debug:
                     # If we're running inside a debugger, re-raise the
                     # exception so that we can debug it.
                     raise
                 # Log the exception, and move onto the next item in `exps`.
-                traceback.print_exc()
+                # traceback.print_exc()
 
     returnVal = []
     with torch.no_grad():
@@ -272,8 +272,8 @@ def main(
         outVal.append({"text": processedText, "score": score})
 
     # Print the results as a csv
-    for result in outVal:
-        print(f"{result['text']} , {result['score']}")
+    # for result in outVal:
+    #     print(f"{result['text']} , {result['score']}")
 
     # Outval to json
     with open('output.json', 'w') as fout:
@@ -324,7 +324,7 @@ def utteranceRun(query):
             exps_dict = {exp_name: (lambda exp=exp: exp) for exp_name, exp in exps}
 
         if exp_names and exp_name_pattern:
-            print("Cannot specify --exp-names and --exp-name-pattern together")
+            # print("Cannot specify --exp-names and --exp-name-pattern together")
             return
 
         if exp_name_pattern:
@@ -334,23 +334,23 @@ def utteranceRun(query):
                 if any(re.match(pat, name) for pat in exp_name_pattern)
             ]
             if not exp_names:
-                print("--exp-name-pattern matched no experiment names")
+                # print("--exp-name-pattern matched no experiment names")
                 return
-            print("Matched experiments:")
-            for name in exp_names:
-                print(name)
+            # print("Matched experiments:")
+            # for name in exp_names:
+            #     print(name)
         elif not exp_names:
             exp_names = list(exps_dict.keys())
 
         error = False
         for exp_name in exp_names:
             if exp_name not in exps_dict:
-                print(f"Experiment {exp_name} not found in config.")
+                # print(f"Experiment {exp_name} not found in config.")
                 error = True
         if error:
-            print("Names in config:")
-            for name in exps_dict.keys():
-                print(name)
+            # print("Names in config:")
+            # for name in exps_dict.keys():
+            #     print(name)
             return
 
         for exp_name in exp_names:
@@ -368,9 +368,9 @@ def utteranceRun(query):
         # if results_path.exists() and not rerun:
         #     print(f"Skipping {exp_name}, already finished")
         #     return
-        print("********************")
-        print(f"Running {exp_name} rank {rank} world size {world_size}")
-        print("********************")
+        # print("********************")
+        # print(f"Running {exp_name} rank {rank} world size {world_size}")
+        # print("********************")
         now = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
         all_metric_results: Dict[str, float] = {}
 
@@ -380,10 +380,10 @@ def utteranceRun(query):
             else exp.test_data
         )
         if not test_data:
-            print(f"No test data! ids: {ids}")
+            # print(f"No test data! ids: {ids}")
             return
 
-        print(f"Total test examples: {len(test_data)}")
+        # print(f"Total test examples: {len(test_data)}")
         test_data = test_data[
             (rank * len(test_data))
             // world_size : ((rank + 1) * len(test_data))
@@ -392,7 +392,7 @@ def utteranceRun(query):
         if num_eval_examples is not None:
             test_data = test_data[:num_eval_examples]
 
-        print(f"Test examples this shard: {len(test_data)}")
+        # print(f"Test examples this shard: {len(test_data)}")
         current_test_index = 0
 
         # Find past model outputs
@@ -441,7 +441,7 @@ def utteranceRun(query):
                         wrap_exception=not debug,
                     ):
                         beam_search_results = [beam.text for beam in kbest]
-                        print(beam_search_results)
+                        # print(beam_search_results)
                         returnVal.extend(kbest)
                         model_outputs_f.write(
                             json.dumps(
@@ -469,10 +469,10 @@ def utteranceRun(query):
                         raise e.__cause__
 
                     # pylint: disable=no-member
-                    print(
-                        f"Last test_datum: {e.orig_item} in experiment {exp_name}",
-                        file=sys.stderr,
-                    )
+                    # print(
+                    #     f"Last test_datum: {e.orig_item} in experiment {exp_name}",
+                    #     file=sys.stderr,
+                    # )
 
                 if debug:
                     # If we're running inside a debugger, re-raise the
@@ -492,8 +492,8 @@ def utteranceRun(query):
         outVal.append({"text": processedText, "score": score})
 
     # Print the results as a csv
-    for result in outVal:
-        print(f"{result['text']} , {result['score']}")
+    # for result in outVal:
+    #     print(f"{result['text']} , {result['score']}")
 
     # Outval to json
     with open('output.json', 'w') as fout:
