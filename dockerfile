@@ -35,5 +35,7 @@ RUN python3.7 -m pip install uvicorn
 
 RUN export PYTHONPATH=$PWD
 
-ENTRYPOINT uvicorn curlAPI:app --reload --host 0.0.0.0 --port 8000
+COPY deploy.sh .
+
+ENTRYPOINT sh deploy.sh
 # This app is using fastapi
