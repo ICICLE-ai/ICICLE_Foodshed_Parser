@@ -8,16 +8,17 @@ import sys, os
 
 app = FastAPI()
 
-@app.get("/query?q={query}")
-def read_root(query: str):
+@app.get("/query")
+def queryt(q: str):
     # Suppress print statements from run_instant
     sys.stdout = open(os.devnull, 'w')
-    outVal = run_instant.utteranceRun(query)
+    outVal = run_instant.utteranceRun(q)
     for idx, val in enumerate(outVal):
         val['rank'] = idx
         val['cmd'] = canonToCmd(val['text'])
     jsonVal = jsonable_encoder(outVal)
     return JSONResponse(content=jsonVal)
+
 @app.get("/ping")
 def ping():
     # Test connection without calling the model.
