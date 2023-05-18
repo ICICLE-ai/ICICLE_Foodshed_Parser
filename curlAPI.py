@@ -8,7 +8,7 @@ import sys, os
 
 app = FastAPI()
 
-@app.get("/{query}")
+@app.get("/query?q={query}")
 def read_root(query: str):
     # Suppress print statements from run_instant
     sys.stdout = open(os.devnull, 'w')
