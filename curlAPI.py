@@ -21,4 +21,4 @@ def read_root(query: str):
 @app.get("/ping")
 def ping():
     # Test connection without calling the model.
-    return JSONRespone(content={'pong': true})
+    return JSONRespone(content=jsonable_encoder({'pong': true}))
