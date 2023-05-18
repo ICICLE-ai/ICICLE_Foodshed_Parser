@@ -18,3 +18,7 @@ def read_root(query: str):
         val['cmd'] = canonToCmd(val['text'])
     jsonVal = jsonable_encoder(outVal)
     return JSONResponse(content=jsonVal)
+@app.get("/ping")
+def ping():
+    # Test connection without calling the model.
+    return JSONRespone(content={'pong': true})
