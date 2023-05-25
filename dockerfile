@@ -39,8 +39,7 @@ COPY demo.py ./demo.py
 COPY runCompletePipeline.sh ./runCompletePipeline.sh
 COPY trained_models/ ./trained_models
 
-# Copy nginx and gunicorn configuration files
-COPY gunicorn.conf.py ./gunicorn.conf.py
+# Copy nginx configuration file
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy docker entrypoint
