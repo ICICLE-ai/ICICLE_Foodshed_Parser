@@ -1,41 +1,45 @@
-FROM python:3.7-slim-buster
 
-ENV PYTHONFAULTHANDLER=1 \
-  PYTHONUNBUFFERED=1 \
-  PYTHONHASHSEED=random \
-  PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on \
-  PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.0.0
+FROM nginx:1.21.3
 
-RUN pip install poetry
+ENV PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 
 
-RUN python3 -m pip install --user pipx
-RUN python3 -m pipx ensurepath
+RUN apt update && apt install -y python3.7 python3-venv python3-pip git
+# RUN curl -sSL https://install.python-poetry.org | python3 -
 
 WORKDIR /app
 # Install poetry environment
-COPY pyproject.toml poetry.lock ./
+# RUN python -m venv venv
+RUN python3.7 -m pip install --upgrade pip
+RUN python3.7 -m pip install --upgrade setuptools
+RUN python3.7 -m pip install --upgrade wheel
+
+
+COPY requirements.txt ./requirements.txt
+RUN python3.7 -m pip install -r requirements.txt
+RUN python3.7 -m pip install git+https://github.com/microsoft/task_oriented_dialogue_as_dataflow_synthesis.git
+# RUN python3.7 -m pip install pandas
+
+RUN python3.7 -m pip install fastapi \
+    prometheus-client \
+    uvicorn \
+    gunicorn
+
+ENV PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random
+# RUN apt update && apt install -y  python3-venv
+
+WORKDIR /app
+
+# COPY --from=builder /app/venv ./venv
 COPY src/ ./
-COPY curlAPI.py ./
-COPY demo.py ./
-COPY runCompletePipeline.sh ./
+COPY main.py ./main.py
+COPY demo.py ./demo.py
+COPY runCompletePipeline.sh ./runCompletePipeline.sh
 COPY trained_models/ ./trained_models
-# RUN poetry config virtualenvs.in-project true
-# RUN poetry env use /usr/bin/python3.7
-# RUN poetry install
-RUN poetry config installer.max-workers 10
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev --no-interaction --no-ansi
-RUN poetry shell
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+COPY gunicorn.conf.py ./gunicorn.conf.py
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Install fastapi and uvicorn
-RUN python3.7 -m pip install fastapi
-RUN python3.7 -m pip install uvicorn
-
-RUN export PYTHONPATH=$PWD
-
-COPY deploy.sh .
-
-ENTRYPOINT sh deploy.sh
-# This app is using fastapi
+EXPOSE 80
+ENTRYPOINT sh docker-entrypoint.sh

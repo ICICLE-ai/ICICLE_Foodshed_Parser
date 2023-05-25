@@ -739,12 +739,6 @@ sexpdata = "0.0.3"
 spacy = "2.2.1"
 statsmodels = "0.11.1"
 
-[package.source]
-type = "git"
-url = "https://github.com/microsoft/task_oriented_dialogue_as_dataflow_synthesis.git"
-reference = "master"
-resolved_reference = "e848243ff88f4b0d1a383b8df2612a1f3edb5300"
-
 [[package]]
 name = "sniffio"
 version = "1.2.0"
