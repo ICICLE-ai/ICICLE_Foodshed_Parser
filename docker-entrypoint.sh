@@ -1,3 +1,2 @@
 #!/bin/bash
-service nginx start;
-gunicorn -w 2 -k uvicorn.workers.UvicornWorker main:app;
+.venv/bin/gunicorn --config gunicorn.conf.py main:app;
