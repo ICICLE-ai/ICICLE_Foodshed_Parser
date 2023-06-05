@@ -1,5 +1,9 @@
 import os
 import multiprocessing
+from prometheus_client import multiprocess
+
+def child_exit(server, worker):
+    multiprocess.mark_process_dead(worker.pid)
 
 # Bind to host and port
 bind = os.environ['HOST'] + ':' + os.environ['PORT']

@@ -2,77 +2,64 @@ from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from prometheus_client import (
-    start_http_server, 
     Counter, 
-    Summary,
+    Histogram,
     generate_latest,
     multiprocess,
     CONTENT_TYPE_LATEST,
     make_asgi_app,
     CollectorRegistry,
 )
-# from prometheus_fastapi_instrumentator import Instrumentator
-# import uvicorn
 import semantic_parsing_with_constrained_lm.run_instant as run_instant
 from demo import canonToCmd
 import sys, os
 
+# Check that the PROMETHEUS_MULTIPROC_DIR environment variable is set.
 if "PROMETHEUS_MULTIPROC_DIR" not in os.environ:
-    raise ValueError("PROMETHEUS_MULTIPROC_DIR must be set to existing empty dir.")
-
-# Start the Prometheus client.
-start_http_server(8001)
+    raise ValueError("PROMETHEUS_MULTIPROC_DIR must be set to empty dir.")
 
 # Define the Prometheus metrics.
-METRICS_COUNTER = Counter("metrics_counter", "Number of metrics requests")
-PING_COUNTER = Counter("ping_counter", "Number of ping requests")
-QUERY_COUNTER = Counter("query_counter", "Number of query requests")
-
-METRICS_TIME = Summary("metrics_time", "Time spent processing metrics")
-QUERY_TIME = Summary("query_time", "Time spent processing query")
-PING_TIME = Summary("ping_time", "Time spent processing ping")
-
+QUERY_HISTOGRAM = Histogram("query_time", "Time spent processing query and number of requests")
+PING_HISTOGRAM = Histogram("ping_time", "Time spent processing ping and number of requests")
 
 app = FastAPI(debug=False)
 
 @app.get("/query")
 def query(q: str):
-    sys.stdout = open(os.devnull, 'w') # Suppress print statements from run_instant
+    with QUERY_HISTOGRAM.time():
+        # Suppress print statements from run_instant
+        sys.stdout = open(os.devnull, 'w') 
 
-    # Increment the query counter and time the query.
-    QUERY_COUNTER.inc()
-    QUERY_TIME.observe(1)
-
-    # Run the model and return the output.
-    q = ' '.join(q.split('_'))
-    outVal = run_instant.utteranceRun(q)
-    for idx, val in enumerate(outVal):
-        val['rank'] = idx
-        val['cmd'] = canonToCmd(val['text'])
-    jsonVal = jsonable_encoder(outVal)
-    return JSONResponse(content=jsonVal)
+        # Run the model and return the output.
+        q = ' '.join(q.split('_'))
+        outVal = run_instant.utteranceRun(q)
+        for idx, val in enumerate(outVal):
+            val['rank'] = idx
+            val['cmd'] = canonToCmd(val['text'])
+        jsonVal = jsonable_encoder(outVal)
+        return JSONResponse(content=jsonVal)
 
 @app.get("/ping")
 def ping():
-    # Increment the ping counter and time the ping.
-    PING_COUNTER.inc()
-    PING_TIME.observe(1)
-
-    # Test connection without calling the model.
-    return JSONResponse(content=jsonable_encoder({'pong': True}))
+    with PING_HISTOGRAM.time():
+        # Test connection without calling the model.
+        return JSONResponse(content=jsonable_encoder({'pong': True}))
 
 @app.get("/metrics")
-def make_metrics():
-    # Increment the metrics counter and time the metrics.
-    METRICS_COUNTER.inc()
-    METRICS_TIME.observe(1)
-
-    # Return the metrics.
+def get_metrics():
+    # Grab metrics from the Prometheus registry
     registry = CollectorRegistry()
     multiprocess.MultiProcessCollector(registry)
-    # resp = JSONResponse(content=jsonable_encoder(generate_latest(registry)))
-    # return Response(prometheus_client.generate_latest())
-    return make_asgi_app(registry)
-
-metrics = make_metrics()
-app.mount("/metrics", metrics)
+    latest = generate_latest(registry).decode().split('\n')
+    # Parse the metrics into a dictionary
+    response_body = dict()
+    for line in latest:
+        if line.startswith('#'):
+            continue
+        if line == '':
+            continue
+        key, val = line.split(' ')
+        response_body[key] = float(val)
+    # Return the metrics as JSON
+    response = JSONResponse(content=jsonable_encoder(response_body))
+    return response
